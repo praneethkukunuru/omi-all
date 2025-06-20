@@ -1,0 +1,11 @@
+{
+  "name": "omiserver",
+  "version": "1.0.0",
+  "description": "Node.js server for Omi Audio Receiver",
+  "main": "main.js",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.19.2",
+    "wav": "^1.0.2"
+  }
+} 
