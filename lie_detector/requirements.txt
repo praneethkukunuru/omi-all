@@ -1,0 +1,2 @@
+# Simple requirements for the lie detector
+# No external dependencies needed - uses only Python standard library 
