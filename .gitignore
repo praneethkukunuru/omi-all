@@ -190,3 +190,8 @@ test_webhook.py
 
 # Deployment scripts
 deploy.sh 
+
+faces/
+known_faces/
+amd
+amd.pub

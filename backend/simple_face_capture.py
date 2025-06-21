@@ -26,12 +26,21 @@ def get_macbook_camera():
 def capture_faces():
     """Capture face images for training"""
     print("Face Capture App Started")
-    print("Press 'c' to capture a face, 'q' to quit")
-    print("Enter the person's name when prompted")
+    print("First, enter the person's name, then press 'c' to capture faces")
+    print("Press 'q' to quit")
     
     # Create faces directory
     faces_dir = Path("known_faces")
     faces_dir.mkdir(exist_ok=True)
+    
+    # Get person name first
+    person_name = input("Enter person name: ").strip()
+    if not person_name:
+        print("Please enter a valid name")
+        return
+    
+    print(f"Starting capture session for: {person_name}")
+    print("Press 'c' to capture a face, 'q' to quit, 'n' for new person")
     
     # Get camera
     cap = get_macbook_camera()
@@ -48,7 +57,7 @@ def capture_faces():
     # Load face detection model
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
     
-    current_person = None
+    current_person = person_name
     capture_count = 0
     
     try:
@@ -67,15 +76,13 @@ def capture_faces():
                 cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
             
             # Add status text
-            status = f"Person: {current_person or 'None'} | Captures: {capture_count}"
+            status = f"Person: {current_person} | Captures: {capture_count}"
             cv2.putText(frame, status, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
             
-            if current_person:
-                cv2.putText(frame, f"Press 'c' to capture for {current_person}", (10, 60), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
-            else:
-                cv2.putText(frame, "Enter person name and press 'c' to capture", (10, 60), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+            cv2.putText(frame, f"Press 'c' to capture for {current_person}", (10, 60), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+            cv2.putText(frame, "Press 'n' for new person, 'q' to quit", (10, 90), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
             
             # Display frame
             cv2.imshow('Face Capture', frame)
@@ -84,18 +91,18 @@ def capture_faces():
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'):
                 break
+            elif key == ord('n'):
+                # Get new person name
+                new_person = input("Enter new person name: ").strip()
+                if new_person:
+                    current_person = new_person
+                    capture_count = 0
+                    print(f"Switched to capturing for: {current_person}")
+                continue
             elif key == ord('c'):
                 if len(faces) == 0:
                     print("No face detected! Please position your face in the camera.")
                     continue
-                
-                if current_person is None:
-                    # Get person name
-                    person_name = input("Enter person name: ").strip()
-                    if not person_name:
-                        print("Please enter a valid name")
-                        continue
-                    current_person = person_name
                 
                 # Create person directory
                 person_dir = faces_dir / current_person
@@ -116,9 +123,14 @@ def capture_faces():
                 if capture_count >= 5:
                     more = input(f"Captured {capture_count} images for {current_person}. Capture more? (y/n): ").lower()
                     if more != 'y':
-                        current_person = None
-                        capture_count = 0
-                        print("Ready for next person...")
+                        # Ask for next person
+                        new_person = input("Enter next person name (or press Enter to quit): ").strip()
+                        if new_person:
+                            current_person = new_person
+                            capture_count = 0
+                            print(f"Ready to capture for: {current_person}")
+                        else:
+                            break
     
     except KeyboardInterrupt:
         print("\nInterrupted by user")
